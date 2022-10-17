@@ -1,0 +1,22 @@
+﻿@page "/"
+@inject NavigationManager Navigation
+
+<PageTitle>Chat!</PageTitle>
+
+<div class="p-3 d-flex flex-column justify-content-center"></div>
+<input @bind="@_userName"
+       type="text"
+       class="form-control"
+       placeholder="Username">
+<button class="btn btn-outline-secondary" type="button" id="button-chat" @onclick="Start">Start chatting!</button>
+
+@code
+{
+    private string? _userName;
+
+    private void Start()
+    {
+        if (string.IsNullOrEmpty(_userName)) return;
+        Navigation.NavigateTo($"/chatas/{_userName}");
+    }
+}

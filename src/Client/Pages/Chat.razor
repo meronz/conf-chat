@@ -1,0 +1,68 @@
+﻿@page "/chatas/{Username}"
+@inject ChatClient ChatClient
+@using ConfChat.Shared
+@implements IDisposable
+
+<PageTitle>Chat!</PageTitle>
+
+<div class="d-flex flex-column justify-content-between">
+    <div class="d-flex flex-column flex-fill">
+        @foreach (var chatMessage in _chatMessages)
+        {
+            <UserChatBubble 
+                Message="chatMessage"
+                IsSender="@(chatMessage.Username == UserName)"/>
+        }
+    </div>
+    <div class="flex-shrink-1 input-group mb-3 border-1 border-top border-secondary align-self-end">
+        <input @bind="@_inputMessage"
+               @onkeydown="Enter"
+               type="text"
+               class="form-control"
+               placeholder="Type a message"
+               aria-describedby="button-send">
+        <button class="btn btn-outline-secondary" type="button" id="button-send" @onclick="Send">Send</button>
+    </div>
+</div>
+
+
+@code
+{
+    private string? _inputMessage;
+
+    [Parameter]
+    public string? UserName { get; set; }
+
+    private readonly List<ChatMessage> _chatMessages = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        ChatClient.OnChatMessageReceived += ChatMessageReceived;
+        await ChatClient.Start();
+    }
+
+    public void Dispose()
+    {
+        ChatClient.OnChatMessageReceived -= ChatMessageReceived;
+    }
+
+    private void ChatMessageReceived(ChatMessage chatMessage)
+    {
+        _chatMessages.Add(chatMessage);
+        StateHasChanged();
+    }
+
+    private async Task Enter(KeyboardEventArgs e)
+    {
+        if (e.Code is not "Enter" and not "NumpadEnter") return;
+        await Send();
+    }
+
+    private async Task Send()
+    {
+        if (string.IsNullOrEmpty(_inputMessage) || string.IsNullOrEmpty(UserName)) return;
+        
+        await ChatClient.SendMessageAsync(new(UserName, _inputMessage, DateTime.UtcNow));
+        _inputMessage = "";
+    }
+}
