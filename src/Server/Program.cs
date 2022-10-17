@@ -11,8 +11,9 @@ if(string.IsNullOrEmpty(redisConnectionString))
 }
 else
 {
+    System.Console.WriteLine($"Using Redis as backplane {redisConnectionString}");
     builder.Services.AddSignalR()
-        .AddStackExchangeRedis(builder.Configuration.GetConnectionString("Redis"));
+        .AddStackExchangeRedis(redisConnectionString);
 }
 
 builder.Services.AddControllersWithViews();

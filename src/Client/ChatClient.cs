@@ -14,6 +14,7 @@ public class ChatClient
     {
         _hubConnection = new HubConnectionBuilder()
             .WithUrl(nav.ToAbsoluteUri("/hubs/chat"))
+            .WithAutomaticReconnect()
             .Build();
     }
     
